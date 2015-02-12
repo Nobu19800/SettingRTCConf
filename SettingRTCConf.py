@@ -576,7 +576,7 @@ class ManagerControl:
         for n in self.confNameList:
             p = self.getParam(n["name"])
             self.confList[n["name"]] = ({"default":n["default"],"type":n["type"],"list":n["list"],"name":n["name"],"label":n["label"],"value":p.split(",")})
-            print n["name"],p.split(",")
+            
         
         
         
@@ -601,7 +601,7 @@ class ManagerControl:
     def getProperty(self, prop, key, value):
         
         if  prop.findNode(key) != None:
-            #print value
+            
             value = prop.getProperty(key)
         return value
     
@@ -636,7 +636,7 @@ class ManagerControl:
         self.filename = filename
         self.filepath = filepath
 
-        print self.filepath
+        
 
         preLoadComp = None
         if self.compList.has_key(self.filename):
