@@ -345,6 +345,10 @@ class ExecCxtWidget(MTabWidget):
         self.subLayouts[-1].addWidget(self.loadECButton)
         self.loadECButton.clicked.connect(self.loadECSlot)
 
+        self.setOrderFileButton = QtGui.QPushButton(u"実行順序設定ファイルの読み込み")
+        self.WidList["exec_cxt.periodic.filename"]["Layout"].addWidget(self.setOrderFileButton)
+        self.setOrderFileButton.clicked.connect(self.setOrderFSlot)
+
         self.mgrWidget = mgrWidget
 
     def loadECSlot(self):
@@ -373,6 +377,18 @@ class ExecCxtWidget(MTabWidget):
         if wid.findText(name) == -1:
             wid.addItem(name)
             wid.lineEdit().setText(name)
+
+    def setOrderFSlot(self):
+        fileName = QtGui.QFileDialog.getOpenFileName(self,u"開く","","Python File (*.py);;Configuration File (*.conf);;All Files (*)")
+        if fileName.isEmpty():
+            return
+
+        ba = str(fileName.toLocal8Bit())
+        fname = os.path.relpath(ba)
+
+        wid = self.WidList["exec_cxt.periodic.filename"]["Widget"]
+        wid.setText(fname)
+
         
 
 class MainWindow(QtGui.QMainWindow):
@@ -463,6 +479,8 @@ class MainWindow(QtGui.QMainWindow):
             self.createTabs()
 
             
+
+            
         else:
             self.mesBox(u"既にコンフィギュレーションファイルは開いています")
 
@@ -501,7 +519,48 @@ class MainWindow(QtGui.QMainWindow):
                     s += v + "\n"
                     f.write(s)
 
+
+
+        fname = os.path.basename(ba)
+        name, ext = os.path.splitext(fname)
+        dname = os.path.dirname(os.path.relpath(ba))
+
+        for c in self.mgrc.mgr.getComponents():
+            s = "Category." + c.get_sdo_id() + ".config_file: " + c.get_sdo_id() + ".conf\n"
+            f.write(s)
+            if dname == "":
+                path = ".\\"+c.get_sdo_id() + ".conf"
+            else:
+                path = dname+"\\"+c.get_sdo_id() + ".conf"
+            f2 = open(path, "w")
+
+            
+            cstes = c.get_configuration().get_active_configuration_set()
+            s = "configuration.active_config: " + cstes.id + "\n"
+            f2.write(s)
+            
+            for l in c.get_configuration().get_configuration_sets():
+                for d in l.configuration_data:
+                    s = "conf." + l.id + "." + d.name + ": " + d.value.value() + "\n"
+                    f2.write(s)
+
+            oEC = c.get_owned_contexts()[0]
+            rate = oEC.get_rate()
+            s = "exec_cxt.periodic.rate: " + str(rate) + "\n"
+            f2.write(s)
+
+            #s = "exec_cxt.periodic.type: " + "" + "\n"
+            f2.close()
+                
+            
+
+
+
 	f.close()
+
+	
+
+	
 
     ##
     #初期化のスロット
@@ -510,6 +569,20 @@ class MainWindow(QtGui.QMainWindow):
         if self.mgrc == None:
             self.mgrc = ManagerControl("")
             self.createTabs()
+
+            
+            """for c in self.mgrc.mgr.getComponents():
+                print c.get_sdo_id()
+                for l in c.get_configuration().get_configuration_sets():
+                    print l.id
+                    print l.description
+                    #prop = OpenRTM_aist.SDOPackage.NVList
+                    #OpenRTM_aist.toProperties(prop,l.configuration_data)
+                    #print prop
+                    for d in l.configuration_data:
+                        print d.name
+                        print d.value.value()"""
+                
         else:
             self.mesBox(u"既にコンフィギュレーションファイルは開いています")
 
@@ -583,7 +656,10 @@ class ManagerControl:
                               {"default":"%b %d %H:%M:%S","type":ManagerControl.TextBox,"list":[],"name":"logger.date_format","label":u"ログに記載する日付・時刻のフォーマット"},
                              {"default":"YES","type":ManagerControl.Combox,"list":["YES","NO"],"name":"timer.enable","label":u"タイマ機能の有効/無効"},
                               {"default":"0.1","type":ManagerControl.DoubleSpinBox,"list":[],"name":"timer.tick","label":u"タイマの精度"},
-                             {"default":"PeriodicExecutionContext","type":ManagerControl.TextCombox,"list":["PeriodicExecutionContext","ExtTrigExecutionContext","OpenHRPExecutionContext","ArtExecutionContext","RTPreemptEC"],"name":"exec_cxt.periodic.type","label":u"実行コンテキストのタイプ"}]
+                             {"default":"PeriodicExecutionContext","type":ManagerControl.TextCombox,"list":["PeriodicExecutionContext","ExtTrigExecutionContext","OpenHRPExecutionContext","ArtExecutionContext","RTPreemptEC"],"name":"exec_cxt.periodic.type","label":u"実行コンテキストのタイプ"},
+                            {"default":"YES","type":ManagerControl.Combox,"list":["YES","NO"],"name":"exec_cxt.periodic.gui","label":u"MultipleOrderedEC使用時にGUIを表示するか"},
+                            {"default":"","type":ManagerControl.TextBox,"list":[],"name":"exec_cxt.periodic.filename","label":u"MultipleOrderedEC使用時に実行順序を設定してあるファイル名"}
+                             ]
         self.confList = {}
 
         
