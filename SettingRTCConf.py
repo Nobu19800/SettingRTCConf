@@ -191,26 +191,26 @@ class ManagerWidget(MTabWidget):
     def __init__(self, mgrc, parent=None):
         MTabWidget.__init__(self, mgrc, parent)
         self.setGUI("manager")
-        self.addLangButton = QtGui.QPushButton(u"追加")
+        self.addLangButton = QtGui.QPushButton(u"サポートする言語の追加")
         self.WidList["manager.supported_languages"]["Layout"].addWidget(self.addLangButton)
         self.addLangButton.clicked.connect(self.addLangSlot)
-        self.delLangButton = QtGui.QPushButton(u"削除")
+        self.delLangButton = QtGui.QPushButton(u"サポートする言語の削除")
         self.WidList["manager.supported_languages"]["Layout"].addWidget(self.delLangButton)
         self.delLangButton.clicked.connect(self.delLangSlot)
-        self.createCompButton = QtGui.QPushButton(u"起動")
+        self.createCompButton = QtGui.QPushButton(u"RTC起動")
         self.WidList["manager.components.precreate"]["Layout"].addWidget(self.createCompButton)
         self.createCompButton.clicked.connect(self.createCompSlot)
-        self.delCompButton = QtGui.QPushButton(u"削除")
+        self.delCompButton = QtGui.QPushButton(u"RTC終了")
         self.WidList["manager.components.precreate"]["Layout"].addWidget(self.delCompButton)
         self.delCompButton.clicked.connect(self.delCompSlot)
-        self.delModuleButton = QtGui.QPushButton(u"削除")
+        self.delModuleButton = QtGui.QPushButton(u"モジュール削除")
         self.WidList["manager.modules.preload"]["Layout"].addWidget(self.delModuleButton)
         self.delModuleButton.clicked.connect(self.delModuleSlot)
-        self.delPathButton = QtGui.QPushButton(u"削除")
+        self.delPathButton = QtGui.QPushButton(u"パス削除")
         self.WidList["manager.modules.load_path"]["Layout"].addWidget(self.delPathButton)
         self.delPathButton.clicked.connect(self.delPathSlot)
 
-        self.loadRTCButton = QtGui.QPushButton(u"RTコンポーネント読み込み")
+        self.loadRTCButton = QtGui.QPushButton(u"RTコンポーネントをファイルから読み込み")
         self.subLayouts[-1].addWidget(self.loadRTCButton)
         self.loadRTCButton.clicked.connect(self.loadRTCSlot)
 
@@ -288,6 +288,28 @@ class CorbaWidget(MTabWidget):
     def __init__(self, mgrc, parent=None):
         MTabWidget.__init__(self, mgrc, parent)
         self.setGUI("corba")
+
+        self.addEndpointsButton = QtGui.QPushButton(u"エンドポイント追加")
+        self.WidList["corba.endpoints"]["Layout"].addWidget(self.addEndpointsButton)
+        self.addEndpointsButton.clicked.connect(self.addEndpointsSlot)
+
+        self.delEndpointsButton = QtGui.QPushButton(u"エンドポイント削除")
+        self.WidList["corba.endpoints"]["Layout"].addWidget(self.delEndpointsButton)
+        self.delEndpointsButton.clicked.connect(self.delEndpointsSlot)
+
+    def addEndpointsSlot(self):
+        wid = self.WidList["corba.endpoints"]["Widget"]
+        
+        if wid.findText(wid.currentText()) == -1:
+            s = str(wid.currentText().toLocal8Bit())
+            if s != "":
+                wid.addItem(s)
+        
+
+    def delEndpointsSlot(self):
+        wid = self.WidList["corba.endpoints"]["Widget"]
+        wid.removeItem(wid.findText(wid.currentText()))
+        
 
 class ConfigWidget(MTabWidget):
     
