@@ -56,7 +56,7 @@ def main():
   f2 = open(dname+s, "w")
   
   
-  s = "Category." + c.get_sdo_id() + ".config_file: " + c.get_sdo_id() + ".conf\n"
+  s = c.getCategory() + "." + c.get_sdo_id() + ".config_file: " + c.get_sdo_id() + ".conf\n"
   f.write(s)
   cstes = c.get_configuration().get_active_configuration_set()
   s = "configuration.active_config: " + cstes.id + "\n"
