@@ -2,8 +2,8 @@
 # -*- encoding: utf-8 -*-
 
 ##
-#   @file ExcelRTC.py
-#   @brief ExcelControl Component
+#   @file SettingRTCConf.py
+#   @brief 
 
 
 
@@ -163,7 +163,7 @@ class MTabWidget(QtGui.QWidget):
 
 
     def setGUI(self, tabName):
-        for i,j in self.mgrc.confList.items():
+        for j in self.mgrc.confList:
             name = j["name"].split(".")[0]
             if name == tabName:
                 if j["type"] == ManagerControl.Combox:
@@ -178,7 +178,11 @@ class MTabWidget(QtGui.QWidget):
                     self.addTextBox(j["name"],j["label"],j["value"],j["default"])
 
         
-
+    def mesBox(self, mes):
+        msgbox = QtGui.QMessageBox( self )
+        msgbox.setText( mes )
+        msgbox.setModal( True )
+        ret = msgbox.exec_()
 
         
         
@@ -236,6 +240,9 @@ class ManagerWidget(MTabWidget):
         s = str(wid.currentText().toLocal8Bit())
         
         comp = self.mgrc.mgr.createComponent(s)
+        if not comp:
+            self.mesBox(u"RTCの起動に失敗しました")
+            return
         wid.addItem(wid.currentText())
 
         self.mgrc.addComp(s, comp)
@@ -264,7 +271,9 @@ class ManagerWidget(MTabWidget):
         fname = os.path.basename(ba)
         name, ext = os.path.splitext(fname)
         dname = os.path.dirname(os.path.relpath(ba))
-        self.mgrc.createComp(name,[dname])
+        if self.mgrc.createComp(name,[dname]) == False:
+            self.mesBox(u"モジュールの読み込みに失敗しました")
+            return
 
         wid = self.WidList["manager.components.precreate"]["Widget"]
         wid.addItem(name)
@@ -612,8 +621,8 @@ class ManagerControl:
 
         self.mgr.activateManager()
         self.mgr.runManager(True)
-        self.filename = ""
-        self.filepath = ""
+        
+        
         self.compList = {}
 
         
@@ -660,20 +669,15 @@ class ManagerControl:
                             {"default":"YES","type":ManagerControl.Combox,"list":["YES","NO"],"name":"exec_cxt.periodic.gui","label":u"MultipleOrderedEC使用時にGUIを表示するか"},
                             {"default":"","type":ManagerControl.TextBox,"list":[],"name":"exec_cxt.periodic.filename","label":u"MultipleOrderedEC使用時に実行順序を設定してあるファイル名"}
                              ]
-        self.confList = {}
+        self.confList = []
 
         
         self.prop = OpenRTM_aist.Manager.instance().getConfig()
-        p = self.getParam("manager.modules.load_path")
-        self.pathList = p.split(",")
-        p = self.getParam("manager.components.precreate")
-        self.nameList = p.split(",")
-        p = self.getParam("manager.modules.preload")
-        self.preloadList = p.split(",")
+        
 
         for n in self.confNameList:
             p = self.getParam(n["name"])
-            self.confList[n["name"]] = ({"default":n["default"],"type":n["type"],"list":n["list"],"name":n["name"],"label":n["label"],"value":p.split(",")})
+            self.confList.append({"default":n["default"],"type":n["type"],"list":n["list"],"name":n["name"],"label":n["label"],"value":p.split(",")})
             
         
         
@@ -705,12 +709,17 @@ class ManagerControl:
     
 
     def getFunc(self, filename, filepath):
-        sys.path.append(filepath[0])
-        (file, pathname, description) = imp.find_module(filename, filepath)
-        mod = imp.load_module(filename, file, pathname, description)
-        func = getattr(mod,filename+"Init",None)
+        try:
+            sys.path.append(filepath[0])
+            (file, pathname, description) = imp.find_module(filename, filepath)
+            mod = imp.load_module(filename, file, pathname, description)
+            func = getattr(mod,filename+"Init",None)
+
+            return func
+        except:
+            return None
         
-        return func
+        
 
 
     def deleteComp(self, name):
@@ -731,32 +740,36 @@ class ManagerControl:
     def createComp(self, filename, filepath):
         
             
-        self.filename = filename
-        self.filepath = filepath
+        
+        
 
         
 
         preLoadComp = None
-        if self.compList.has_key(self.filename):
-            func = self.compList[self.filename]["func"]
-            preLoadComp = self.compList[self.filename]
+        if self.compList.has_key(filename):
+            func = self.compList[filename]["func"]
+            preLoadComp = self.compList[filename]
             
         
                 
                 
 
         if preLoadComp == None:    
-            func = self.getFunc(self.filename, self.filepath)
+            func = self.getFunc(filename, filepath)
+            if func == None:
+                return False
             
         if func:
             func(self.mgr)
-            self.comp = self.mgr.createComponent(self.filename)
+            self.comp = self.mgr.createComponent(filename)
+            if not self.comp:
+                return False
             if preLoadComp:
                 preLoadComp["compList"].append(self.comp)
             else:
-                self.compList[self.filename] = {"filename":self.filename,"filepath":self.filepath,"func":func,"compList":[self.comp]}
+                self.compList[filename] = {"filename":filename,"filepath":filepath,"func":func,"compList":[self.comp]}
 
-        
+        return True
         
 ##
 # @brief 
