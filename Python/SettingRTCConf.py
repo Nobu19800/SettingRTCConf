@@ -283,8 +283,11 @@ class ManagerWidget(MTabWidget):
             wid.addItem(fname)
 
         wid = self.WidList["manager.modules.load_path"]["Widget"]
-        if wid.findText(dname) == -1:
+
+        if dname == "":
             dname = "./" + dname
+        if wid.findText(dname) == -1:
+            
             wid.addItem(dname)
 
     
@@ -378,8 +381,10 @@ class ExecCxtWidget(MTabWidget):
             wid.addItem(fname)
 
         wid = self.mgrWidget.WidList["manager.modules.load_path"]["Widget"]
-        if wid.findText(dname) == -1:
+
+        if dname == "":
             dname = "./" + dname
+        if wid.findText(dname) == -1:
             wid.addItem(dname)
 
         wid = self.WidList["exec_cxt.periodic.type"]["Widget"]
@@ -725,11 +730,11 @@ class ManagerControl:
     def deleteComp(self, name):
         
         if self.compList.has_key(name):
-            
-            self.compList[name]["compList"][-1].exit()
-            del self.compList[name]["compList"][-1]
-            if len(self.compList[name]["compList"]) == 0:
-                del self.compList[name]
+            if len(self.compList[name]["compList"]) != 0:
+                self.compList[name]["compList"][-1].exit()
+                del self.compList[name]["compList"][-1]
+            #if len(self.compList[name]["compList"]) == 0:
+            #    del self.compList[name]
 
     def addComp(self, name, comp):
         
@@ -758,9 +763,10 @@ class ManagerControl:
             func = self.getFunc(filename, filepath)
             if func == None:
                 return False
+            func(self.mgr)
             
         if func:
-            func(self.mgr)
+            
             self.comp = self.mgr.createComponent(filename)
             if not self.comp:
                 return False
@@ -768,6 +774,8 @@ class ManagerControl:
                 preLoadComp["compList"].append(self.comp)
             else:
                 self.compList[filename] = {"filename":filename,"filepath":filepath,"func":func,"compList":[self.comp]}
+        else:
+            return False
 
         return True
         
