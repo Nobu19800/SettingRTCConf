@@ -540,7 +540,7 @@ class MainWindow(QtGui.QMainWindow):
         dname = os.path.dirname(os.path.relpath(ba))
 
         for c in self.mgrc.mgr.getComponents():
-            s = "Category." + c.get_sdo_id() + ".config_file: " + c.get_sdo_id() + ".conf\n"
+            s = c.getCategory() + "." + c.get_sdo_id() + ".config_file: " + c.get_sdo_id() + ".conf\n"
             f.write(s)
             if dname == "":
                 path = ".\\"+c.get_sdo_id() + ".conf"

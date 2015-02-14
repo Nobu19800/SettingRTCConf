@@ -126,7 +126,8 @@ void MainWindow::save()
 	std::vector<RTC::RtcBase*> bl = mgrc->mgr->getComponents();
 	for(int i=0;i < bl.size();i++)
 	{
-		std::string s = "Category.";
+		std::string s = bl[i]->getCategory();
+		s += ".";
 		s += bl[i]->get_sdo_id();
 		s += ".config_file: ";
 		s += bl[i]->get_sdo_id();
