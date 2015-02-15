@@ -36,7 +36,6 @@ from ManagerControl import ManagerControl
 
 
 class MTabWidget(QtGui.QWidget):
-    UpdateSizeSignal = QtCore.pyqtSignal()
     def __init__(self, mgrc, parent=None):
         super(MTabWidget, self).__init__(parent)
         self.mgrc = mgrc
