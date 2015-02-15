@@ -22,6 +22,11 @@ PathList::PathList(std::string path)
 	std::string reba = refileName.toLocal8Bit();
 	char* repath = const_cast<char*>(reba.c_str());
 	dname = coil::dirname(repath);
+
+	char* tmp_p = const_cast<char*>(path.c_str());
+	QString inv_refileName = QDir(coil::dirname(tmp_p).c_str()).relativeFilePath(QDir().absolutePath());
+	inv_rdir = inv_refileName.toLocal8Bit();
+	
 }
 
 confName::confName(std::string def, UIList type, std::vector<std::string> list, std::string name, std::string label)

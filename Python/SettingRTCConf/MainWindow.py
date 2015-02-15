@@ -160,7 +160,7 @@ class MainWindow(QtGui.QMainWindow):
                     
                     if k == "manager.modules.load_path" or k == "manager.modules.preload" or k == "manager.components.precreate" or k == "corba.endpoints":
                         for c in range(0, j["Widget"].count()):
-                            v += str(j["Widget"].itemText(c).toLocal8Bit())
+                            v += str(j["Widget"].itemText(c).toLocal8Bit()).replace("\\","/")
                             if c < j["Widget"].count()-1:
                                 v += ","
                     else:
@@ -177,14 +177,29 @@ class MainWindow(QtGui.QMainWindow):
         name, ext = os.path.splitext(fname)
         dname = os.path.dirname(os.path.relpath(ba))
 
+        
+        inv_dname = os.path.relpath(os.path.abspath(".\\"), dname)
+        s = "cd " + inv_dname + "\n"
+        s += "rtcd_python -f " + ".\\" + os.path.relpath(ba)
+
+        if dname == "":
+            path = ".\\"+name+".bat"
+        else:
+            path = dname+"\\"+name+".bat"
+        pf = open(path, "w")
+        pf.write(s)
+        pf.close()
+
         for c in self.mgrc.mgr.getComponents():
-            s = c.getCategory() + "." + c.get_sdo_id() + ".config_file: " + c.get_sdo_id() + ".conf\n"
-            f.write(s)
+            
             if dname == "":
-                path = ".\\"+c.get_sdo_id() + ".conf"
+                path = "./"+c.get_sdo_id() + ".conf"
             else:
-                path = dname+"\\"+c.get_sdo_id() + ".conf"
+                path = dname.replace("\\","/") + "/" +c.get_sdo_id() + ".conf"
             f2 = open(path, "w")
+
+            s = c.getCategory() + "." + c.get_sdo_id() + ".config_file: " + path + "\n"
+            f.write(s)
 
             
             cstes = c.get_configuration().get_active_configuration_set()

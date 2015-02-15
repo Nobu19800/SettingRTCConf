@@ -123,35 +123,50 @@ void MainWindow::save()
 
 	PathList p = PathList(ba);
 
+	std::string tpt = p.dname;
+	tpt += "/";
+	tpt += p.name;
+	tpt += ".bat";
+	std::ofstream pf( tpt );
+
+	pf << "cd " << p.inv_rdir << std::endl;
+	pf << "rtcd -f " << p.dname << "/" << p.name << "." << p.cxt << std::endl;
+	pf.close();
+
 	std::vector<RTC::RtcBase*> bl = mgrc->mgr->getComponents();
 	for(int i=0;i < bl.size();i++)
 	{
-		std::string s = bl[i]->getCategory();
-		s += ".";
-		s += bl[i]->get_sdo_id();
-		s += ".config_file: ";
-		s += bl[i]->get_sdo_id();
-		s += ".conf";
-
-		ofs << s << std::endl;
+		
 
 		std::string path;
 
 		if(p.dname == "")
 		{
-			path = ".\\";
+			path = "./";
 			path += bl[i]->get_sdo_id();
 			path += ".conf";
 		}
 		else
 		{
 			path = p.dname;
-			path += "\\";
+			path += "/";
 			path += bl[i]->get_sdo_id();
 			path += ".conf";
 		}
 
 		std::ofstream ofs2( path );
+
+
+		std::string s = bl[i]->getCategory();
+		s += ".";
+		s += bl[i]->get_sdo_id();
+		s += ".config_file: ";
+		s += path;
+
+
+		ofs << s << std::endl;
+
+
 
 		SDOPackage::ConfigurationSet* cstes = bl[i]->get_configuration()->get_active_configuration_set();
 		s = "configuration.active_config: ";

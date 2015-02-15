@@ -16,6 +16,7 @@ public:
 	std::string name;
 	std::string cxt;
 	std::string dname;
+	std::string inv_rdir;
 };
 
 
