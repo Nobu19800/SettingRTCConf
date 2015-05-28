@@ -1,2 +1,2 @@
-from MainWindow import *
+#from MainWindow import *
 

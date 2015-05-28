@@ -33,7 +33,7 @@ import CosNaming
 from PyQt4 import QtCore, QtGui
 
 
-import SettingRTCConf
+import SettingRTCConf.MainWindow
 
 
         
@@ -44,7 +44,7 @@ def main():
     
     
     app = QtGui.QApplication([""])
-    mainWin = SettingRTCConf.MainWindow()
+    mainWin = SettingRTCConf.MainWindow.MainWindow()
     mainWin.show()
     app.exec_()
     #mgrc.createComp("MyFirstComponent",[".\\MyFirstComponent"])

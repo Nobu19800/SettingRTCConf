@@ -38,15 +38,16 @@ from ManagerControl import ManagerControl
 
 class ManagerWidget(MTabWidget):
     
-    def __init__(self, mgrc, parent=None):
+    def __init__(self, mgrc, language="Python",  parent=None):
         MTabWidget.__init__(self, mgrc, parent)
         self.setGUI("manager")
-        self.addLangButton = QtGui.QPushButton(u"サポートする言語の追加")
-        self.WidList["manager.supported_languages"]["Layout"].addWidget(self.addLangButton)
-        self.addLangButton.clicked.connect(self.addLangSlot)
-        self.delLangButton = QtGui.QPushButton(u"サポートする言語の削除")
-        self.WidList["manager.supported_languages"]["Layout"].addWidget(self.delLangButton)
-        self.delLangButton.clicked.connect(self.delLangSlot)
+        self.language = language
+        #self.addLangButton = QtGui.QPushButton(u"サポートする言語の追加")
+        #self.WidList["manager.supported_languages"]["Layout"].addWidget(self.addLangButton)
+        #self.addLangButton.clicked.connect(self.addLangSlot)
+        #self.delLangButton = QtGui.QPushButton(u"サポートする言語の削除")
+        #self.WidList["manager.supported_languages"]["Layout"].addWidget(self.delLangButton)
+        #self.delLangButton.clicked.connect(self.delLangSlot)
         self.createCompButton = QtGui.QPushButton(u"RTC起動")
         self.WidList["manager.components.precreate"]["Layout"].addWidget(self.createCompButton)
         self.createCompButton.clicked.connect(self.createCompSlot)
@@ -64,9 +65,19 @@ class ManagerWidget(MTabWidget):
         self.subLayouts[-1].addWidget(self.loadRTCButton)
         self.loadRTCButton.clicked.connect(self.loadRTCSlot)
 
-        
+        self.addTextBox("filenameBox.sub", u"RTコンポーネント名", [""] , "")
+        self.loadFileRTCButton = QtGui.QPushButton(u"RTコンポーネント読み込み")
+        self.WidList["filenameBox.sub"]["Layout"].addWidget(self.loadFileRTCButton)
+        self.loadFileRTCButton.clicked.connect(self.loadFileRTCSlot)
 
         
+
+    def loadFileRTCSlot(self):
+        wid = self.WidList["filenameBox.sub"]["Widget"]
+        s = str(wid.text().toLocal8Bit())
+        if s == "":
+            return
+        self.loadRTC(s)
 
     def addLangSlot(self):
         wid = self.WidList["manager.supported_languages"]["Widget"]
@@ -108,18 +119,20 @@ class ManagerWidget(MTabWidget):
         wid = self.WidList["manager.modules.load_path"]["Widget"]
         wid.removeItem(wid.findText(wid.currentText()))
 
-    def loadRTCSlot(self):
-        fileName = QtGui.QFileDialog.getOpenFileName(self,u"開く","","Python File (*.py);;All Files (*)")
-
-	if fileName.isEmpty():
-            return
-        ba = str(fileName.toLocal8Bit())
-        fname = os.path.basename(ba)
+    def loadRTC(self, fileName):
+        fname = os.path.basename(fileName)
         name, ext = os.path.splitext(fname)
-        dname = os.path.dirname(os.path.relpath(ba))
-        if self.mgrc.createComp(name,[dname]) == False:
+
+	tmp_dname = os.path.dirname(fileName)
+        dname = [tmp_dname]
+
+
+        if self.mgrc.createComp(name,dname) == False:
             self.mesBox(u"モジュールの読み込みに失敗しました")
             return
+
+        if tmp_dname == "/usr/local/components/lib":
+            dname = [tmp_dname]
 
         wid = self.WidList["manager.components.precreate"]["Widget"]
         wid.addItem(name)
@@ -130,8 +143,25 @@ class ManagerWidget(MTabWidget):
 
         wid = self.WidList["manager.modules.load_path"]["Widget"]
 
-        if dname == "":
-            dname = "./" + dname
-        if wid.findText(dname) == -1:
+        if dname[0] == "":
+            dname[0] = "./" + dname[0]
+        if wid.findText(dname[0]) == -1:
             
-            wid.addItem(dname)
+            wid.addItem(dname[0])
+
+    def loadRTCSlot(self):
+        pyFilePath = "Python File (*.py);;"
+        cppFilePath = "Dynamic Link Library (*.dll *.so);;"
+        allFilePath = "All Files (*)"
+        if self.language == "Python":
+            filepath = pyFilePath + cppFilePath + allFilePath
+            fileName = QtGui.QFileDialog.getOpenFileName(self,u"開く","",filepath)
+        else:
+            filepath = cppFilePath + pyFilePath + allFilePath
+            fileName = QtGui.QFileDialog.getOpenFileName(self,u"開く","",filepath)
+
+        if fileName.isEmpty():
+            return
+        ba = str(fileName.toLocal8Bit())
+
+        self.loadRTC(ba)

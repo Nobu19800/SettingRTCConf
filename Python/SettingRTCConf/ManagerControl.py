@@ -41,6 +41,8 @@ class ManagerControl:
     DoubleSpinBox = 5
     def __init__(self, conf_filepath):
         self.conf_filepath = conf_filepath
+        
+        
         if conf_filepath == "":
             self.mgr = OpenRTM_aist.Manager.init(sys.argv)
         else:
@@ -61,7 +63,7 @@ class ManagerControl:
     def SetParam(self):
 
         self.confNameList = [{"default":"localhost","type":ManagerControl.TextBox,"list":[],"name":"corba.nameservers","label":u"RTC等を登録するネームサーバ"},
-                             {"default":"%h.host_cxt/%n.mgr","type":ManagerControl.TextBox,"list":[],"name":"naming.formats","label":u"RTCをネームサーバに登録する際のフォーマット"},
+                             {"default":"%n.rtc","type":ManagerControl.TextBox,"list":[],"name":"naming.formats","label":u"RTCをネームサーバに登録する際のフォーマット"},
                              {"default":"NORMAL","type":ManagerControl.Combox,"list":["SILENT","ERROR","WARN","NORMAL","INFO","DEBUG","TRACE","VERBOSE","PARANOID"],"name":"logger.log_level","label":u"ログレベル"},
                               {"default":"1000","type":ManagerControl.SpinBox,"list":[],"name":"exec_cxt.periodic.rate","label":u"実行コンテキストの周期"},
                                {"default":"NO","type":ManagerControl.Combox,"list":["YES","NO"],"name":"manager.is_master","label":u"マスターマネージャにするかどうか？"},
@@ -70,6 +72,7 @@ class ManagerControl:
                               {"default":"","type":ManagerControl.Combox,"list":[],"name":"manager.components.precreate","label":u"スタート時に起動するコンポーネント名"},
                              {"default":"1.0","type":ManagerControl.TextBox,"list":[],"name":"config.version","label":u"バージョン"},
                               {"default":"manager","type":ManagerControl.TextBox,"list":[],"name":"manager.name","label":u"managerの名前"},
+                            {"default":"%n.mgr","type":ManagerControl.TextBox,"list":[],"name":"manager.naming_formats","label":u"managerの名前のフォーマット"},
                               {"default":"YES","type":ManagerControl.Combox,"list":["YES","NO"],"name":"manager.corba_servant","label":u"マネージャのCORBAサーバントを起動するか"},
                              {"default":"localhost:2810","type":ManagerControl.TextBox,"list":[],"name":"corba.master_manager","label":u"マスターマネージャのアドレスとポート番号"},
                              {"default":"YES","type":ManagerControl.Combox,"list":["YES","NO"],"name":"manager.shutdown_on_nortcs","label":u"RTCが一つもなくなった場合にプロセスを終了させるかどうか(RTCの削除で判定)"},
@@ -88,7 +91,7 @@ class ManagerControl:
                               {"default":"NO","type":ManagerControl.Combox,"list":["YES","NO"],"name":"naming.update.rebind","label":u"すでに名前と参照が登録されているネームサーバ上で名前が削除されるなどした場合に再度登録を行う"},
                              {"default":"YES","type":ManagerControl.Combox,"list":["YES","NO"],"name":"manager.modules.abs_path_allowed","label":u"モジュールを絶対パスで指定するか"},
                               {"default":"YES","type":ManagerControl.Combox,"list":["YES","NO"],"name":"logger.enable","label":u"ロガーの有効化・無効化"},
-                             #{"default":"./rtc%p.log","type":ManagerControl.TextBox,"list":[],"name":"logger.file_name","label":u"ログファイル名"},
+                             {"default":"./rtc%p.log","type":ManagerControl.TextBox,"list":[],"name":"logger.file_name","label":u"ログファイル名"},
                               {"default":"%b %d %H:%M:%S","type":ManagerControl.TextBox,"list":[],"name":"logger.date_format","label":u"ログに記載する日付・時刻のフォーマット"},
                              {"default":"YES","type":ManagerControl.Combox,"list":["YES","NO"],"name":"timer.enable","label":u"タイマ機能の有効/無効"},
                               {"default":"0.1","type":ManagerControl.DoubleSpinBox,"list":[],"name":"timer.tick","label":u"タイマの精度"},
@@ -99,7 +102,16 @@ class ManagerControl:
         self.confList = []
 
         
-        self.prop = OpenRTM_aist.Manager.instance().getConfig()
+        self.prop  = OpenRTM_aist.Properties()
+        self.prop.setDefaults(OpenRTM_aist.default_config)
+        if self.conf_filepath == "":
+            fd = file("rtc.conf","r")
+        else:
+            fd = file(self.conf_filepath,"r")
+            
+        self.prop.load(fd)
+        fd.close()
+        #self.prop = OpenRTM_aist.Manager.instance().getConfig()
         
 
         for n in self.confNameList:
@@ -162,13 +174,16 @@ class ManagerControl:
         
         if self.compList.has_key(name):
             self.compList[name]["compList"].append(comp)
+
+    
+    def createEC(self, filepath):
+        filepath[0] = os.path.relpath(filepath[0])
                 
         
     def createComp(self, filename, filepath):
         
-            
         
-        
+        filepath[0] = os.path.relpath(filepath[0])
 
         
 
