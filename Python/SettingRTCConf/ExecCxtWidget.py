@@ -101,7 +101,17 @@ class ExecCxtWidget(MTabWidget):
         self.loadEC(s)
 
     def loadECSlot(self):
-        fileName = QtGui.QFileDialog.getOpenFileName(self,u"開く","","Python File (*.py);;Dynamic Link Library (*.dll *.so);;All Files (*)")
+        pyFilePath = "Python File (*.py);;"
+        cppFilePath = "Dynamic Link Library (*.dll *.so);;"
+        allFilePath = "All Files (*)"
+        if self.language == "Python":
+            filepath = pyFilePath + cppFilePath + allFilePath
+            fileName = QtGui.QFileDialog.getOpenFileName(self,u"開く","",filepath)
+        else:
+            filepath = cppFilePath + pyFilePath + allFilePath
+            fileName = QtGui.QFileDialog.getOpenFileName(self,u"開く","",filepath)
+
+        #fileName = QtGui.QFileDialog.getOpenFileName(self,u"開く","","Python File (*.py);;Dynamic Link Library (*.dll *.so);;All Files (*)")
 
         if fileName.isEmpty():
             return
@@ -115,12 +125,15 @@ class ExecCxtWidget(MTabWidget):
         
 
     def setOrderFSlot(self):
-
+        pyFilePath = "Python File (*.py);;"
+        cppFilePath = "Lua FIle (*.lua);;"
+        confFilePath = "Config FIle (*.conf);;"
+        allFilePath = "All Files (*)"
         if self.language == "Python":
-            filepath = pyFilePath + cppFilePath + allFilePath
+            filepath = pyFilePath + confFilePath + cppFilePath + allFilePath
             fileName = QtGui.QFileDialog.getOpenFileName(self,u"開く","",filepath)
         else:
-            filepath = cppFilePath + pyFilePath + allFilePath
+            filepath = cppFilePath + confFilePath + pyFilePath + allFilePath
             fileName = QtGui.QFileDialog.getOpenFileName(self,u"開く","",filepath)
         
         if fileName.isEmpty():
