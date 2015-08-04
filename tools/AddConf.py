@@ -41,7 +41,7 @@ def main():
     print u"RTCが見つかりませんでした"
   #print l,comp.object.get_sdo_id()
   c = comp.object
-
+  
 
   fname = os.path.basename(file_name)
   name, ext = os.path.splitext(fname)
@@ -56,7 +56,7 @@ def main():
   f2 = open(dname+s, "w")
   
   
-  s = c.getCategory() + "." + c.get_sdo_id() + ".config_file: " + c.get_sdo_id() + ".conf\n"
+  s = c.get_component_profile().category + "." + c.get_sdo_id() + ".config_file: " + c.get_sdo_id() + ".conf\n"
   f.write(s)
   cstes = c.get_configuration().get_active_configuration_set()
   s = "configuration.active_config: " + cstes.id + "\n"
