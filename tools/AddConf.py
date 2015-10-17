@@ -1,13 +1,41 @@
 #!/bin/env python
 # -*- encoding: utf-8 -*-
 
+##
+#   @file AddConf.py
+#   @brief 指定したRTCのコンフィギュレーションパラメータの設定ファイルを作成
+# -fオプション ファイル名
+# -cオプション RTCパス
+
+import optparse
 import rtctree.tree
 import sys
+import traceback
 import os
 
 
 def main():
 
+  usage = ''' '''
+  parser = optparse.OptionParser(usage=usage, version=1.0)
+  parser.add_option('-c', '--component', dest='component', action='store_true',
+            default="",
+            help='Component Path. [Default: %default]')
+  parser.add_option('-g', '--filename', dest='filename', action='store_true',
+            default="",
+            help='File Path. [Default: %default]')
+
+  if argv:
+        sys.argv = [sys.argv[0]] + argv
+  try:
+        options, args = parser.parse_args()
+  except optparse.OptionError as e:
+        print('OptionError:', e, file=sys.stderr)
+        return 1
+  option_store.OptionStore().verbose = options.verbose
+
+  print options.component,options.filename
+  return
   cpath = []
   file_name = ""
   mode = False
